@@ -108,16 +108,14 @@ flowchart LR
 | MSC | ストレージ | block device |
 | Vendor-specific | 独自機能 | 自前 driver / library |
 
-## 図9-1 `TraceDock` の構成と descriptor の配置
+## 図9-1 generic HID gamepad と host 側入力処理の対応
 
 ```mermaid
 flowchart TD
-  A["Type-C Receptacle"] --> B["PD / Power"]
-  A --> C["USB Device Controller"]
-  C --> D["HID Interface"]
-  C --> E["Bulk Logging Interface"]
-  F["Host Tool"] --> D
-  F --> E
+  A["USB Device"] --> B["HID Interface"]
+  B --> C["Interrupt IN Endpoint"]
+  C --> D["Host HID Stack"]
+  D --> E["Game / Input Tool"]
 ```
 
 ## 図10-1 debug の切り分け順

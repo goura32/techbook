@@ -1,27 +1,39 @@
-# 2章 バス、トポロジ、ホストとデバイスの役割
+# 2章 USB 2.0 の基本モデル
 
-USB を理解するとき、まず整理したいのは「誰が主導権を持つのか」です。USB は host 主導のバスです。device は好きなタイミングで勝手に送信しません。host が列挙し、host が polling し、host が転送を進めます。この原則を押さえておくだけで、転送方式や class の理解がかなり楽になります。
+USB を理解するとき、最初に固定したいのは `host 主導` という原則です。device は好きなタイミングで勝手に送信しません。host が列挙し、host が polling し、host が転送を進めます。この基本があるだけで、transfer、class、descriptor、driver の話がかなり整理しやすくなります。
 
-役割として最低限分けたいのは、host、hub、device です。host はバス全体を管理し、hub は接続点を増やし、device は機能を提供します。ここで気をつけたいのは、Type-C や PD の世界に入ると power role や data role の話が加わるため、「電力を出す側」と「host」が同じとは限らなくなることです。この章ではまず、USB 2.0 由来の基本トポロジとしての host/device を押さえます。
+## 2-1. host、hub、device、interface、endpoint
 
-この土台を曖昧にしたまま Type-C や PD の話へ進むと、data role と power role が混線しやすくなります。だから本書では、最初に host 主導という原則を固定し、そのあとで「電力側では別の role がある」という順番を取ります。順番を守るだけで、かなり多くの誤解を避けられます。
+最低限分けたい単位は、host、hub、device、interface、endpoint です。host はバス全体を管理し、hub は接続点を増やし、device は機能を提供します。device の中では interface が機能の単位で、endpoint が実際の転送口です。
 
-device の中でも、実装や解析で特に重要なのが interface と endpoint です。interface は機能の単位であり、endpoint は実際の転送口です。多くの誤解は、「device がひとつなら機能もひとつ」と思ってしまうところから始まります。複合デバイスでは、ひとつの device に複数の interface があり、それぞれ別の class として host に見えることがあります。
+ここで大切なのは、`USB device がひとつだから機能もひとつ` ではないことです。複合デバイスでは複数 interface が同居し、OS や driver は interface ごとに別の機能として解釈します。ゲームコントローラー、マイク、タッチパッド、ドックのような製品ほど、この分離が重要になります。
 
-この distinction は host 側ソフトウェアでも重要です。OS や user-space から見えるのは、しばしば「device 全体」ではなく「interface ごとの機能」です。したがって、device をひとつの黒箱として扱うより、「この interface は制御」「この endpoint は logging」のように責務を切って見たほうが、host 側の code structure も整理しやすくなります。
+## 2-2. host 主導という前提
 
-`TraceDock` でもこの考え方を使います。制御用の HID interface と、ログ転送用の bulk interface を分けることで、host 側での扱いがかなり明確になります。もし全部をひとつの vendor-specific interface に押し込めば、短期的には楽でも、host 側ツールや debug は重くなります。つまり interface の切り方は、そのまま保守性に効きます。
+USB の転送は host が開始します。interrupt transfer ですら、device が割り込みのように押し込むのではなく、host が周期的に見に来る契約です。ここを誤解すると、firmware 設計で「なぜ即時に飛べないのか」が見えにくくなります。
 
-hub の存在も軽く見ないほうがよいところです。開発初期は直結でしか見ていなくても、実運用では hub 経由や dock 経由が普通に入ってきます。そうなると power distribution、signal path、timing の条件が変わり、直結では出なかった不具合が現れます。USB の support が難しいのは、トポロジが製品の外側にあることが多いからです。
+この前提は観測にも効きます。ログを見たときに、device が壊れているのか、host 側の scheduling が期待と違うのか、hub や cable 条件で遅れているのかを見分けるには、まず host 主導であることを忘れないほうがよいです。
 
-USB のトポロジを考えるとき、壊れる場所も役割ごとに違います。hub 越しにだけ不安定なら signal path や power distribution を疑うべきかもしれませんし、特定 OS の host controller だけで失敗するなら driver や enumeration timing を疑うべきかもしれません。役割を分けて見ることは、そのまま観測点を増やすことでもあります。
+## 2-3. port、address、configuration
 
-実務で役立つ見方として、まず次の 3 つを意識しておくと切り分けが速くなります。
+USB device は挿した瞬間から最終形になるわけではありません。host は port で attach を検知し、reset をかけ、address を割り当て、configuration を選びます。つまり USB device は、`物理的に挿さっている状態` と `論理的に使える状態` の間に段階があります。この段階性が、列挙エラーや OS ごとの差分を理解する土台になります。
+
+## 2-4. bus power と default power
+
+電力の詳しい話は後の PD 章で扱いますが、USB 2.0 の段階でも `default power` と `構成後の消費` を分けて考える必要があります。列挙の途中では、まだ高機能モードや追加電力を前提にしてはいけません。だから USB device 設計では、`最低限どこまで default power で成立させるか` が最初の判断になります。
+
+## 2-5. 何が物理層で、何が論理層か
+
+同じ「認識しない」でも、原因は別の層にあります。たとえば cable 不良や connector の接触不良は物理層寄りです。descriptor の崩れや class 設計の不整合は論理層寄りです。PD contract の問題はさらに別軸です。USB の不具合報告はしばしば全部を `つながらない` でまとめてきますが、実装側では層を分けて聞き直す必要があります。
+
+## 2-6. 直結、hub 経由、host 差分
+
+実務で役立つ最初の切り分けは、次の 3 つです。
 
 - 直結で再現するか
-- hub 経由でだけ再現するか
+- hub や dock 経由でだけ再現するか
 - host を変えると再現性が変わるか
 
-この 3 点だけでも、問題が device 内部に近いのか、バス条件に近いのかをかなり絞れます。USB を role の関係として見る価値は、ここにもあります。
+この 3 点だけでも、問題が device 側に近いのか、bus 条件に近いのか、OS や host controller に近いのかをかなり絞れます。
 
-この章の結論は単純です。USB を cable 1 本の話としてではなく、host/device/hub/interface/endpoint の関係として見ることです。これがないと、次章で扱う enumeration や descriptor も、単なる field の一覧に見えてしまいます。次の章では、attach から set configuration までの流れをたどりながら、USB 2.0 仕様 Chapter 9 の基本を `TraceDock` に結びつけます。
+この章の結論は、USB を `ケーブル 1 本` の話ではなく、`host / hub / device / interface / endpoint` の関係として見ることです。次の章では、この土台の上で列挙と USB 2.0 仕様のデバイスフレームワークを整理します。

@@ -2,155 +2,202 @@
 
 ## 書籍の目的
 
-- USB を単なるコネクタや転送速度の話としてではなく、ホスト、デバイス、ケーブル、電力、列挙、転送、デバッグまで一貫したシステムとして理解できるようにする
-- USB 2.0、USB 3.2、USB Type-C、USB Power Delivery の関係を、実装と解析の判断軸が残る形で整理する
+- USB を単なるコネクタ名や速度表記ではなく、`USB 2.0` `USB 3.2` `USB Type-C` `USB Power Delivery` `USB4` `Alt Mode` `Thunderbolt 互換` が重なる体系として理解できるようにする
+- 規格書を読んでも実装や解析に結びつかない、という壁を越えるために、`仕様` `観測` `最低限のハード前提` をひとつの本にまとめる
+- `つながらない` `映像が出ない` `高機能モードに入らない` `host により挙動が違う` といった現場の症状を、どの層で切り分けるべきか判断できるようにする
 
 ## 仮タイトル
 
 - 技術の輪郭 USB
-- サブタイトル案: 列挙、転送、Type-C、PD、解析までを実装視点でつなぐ
+- サブタイトル案: 規格、Type-C、PD、USB4、観測までを実務でつなぐ
 
-## 通しサンプル
+## 本書の軸
 
-- 題材名: `TraceDock`
-- 概要:
-  - USB Type-C 接続の小型測定デバイス
-  - 通常動作では HID で制御し、bulk 転送でログを取得する
-  - 高負荷時は USB PD による追加電力を使い、ホスト側ツールで状態確認とファームウェア更新を行う
-- ねらい:
-  - 列挙、descriptor、転送方式、Type-C、PD、解析手順がどこでつながるかを同じ題材で追えるようにする
-  - 「USB がつながらない」ときに、コネクタ、電力、列挙、クラス、ドライバのどこを疑うべきかを見えるようにする
-  - 規格書の情報を、実装判断とデバッグ判断へ変換する流れを章ごとに示す
+- 主役は USB 規格そのもの
+- 通しサンプルは補助にとどめる
+- 特定の架空デバイスは本文の中心に置かず、必要なら短いケーススタディへとどめる
+- 深掘りの中心は `USB-IF` `VESA` `Wireshark / usbmon / USBPcap` の一次情報と観測手法に置く
 
 ## 章構成案
 
-1. USB を仕様から理解するための見取り図
-2. バス、トポロジ、ホストとデバイスの役割
-3. 列挙、descriptor、USB 2.0 仕様 Chapter 9 の基本
-4. 転送方式とスケジューリング
-5. コネクタ、ケーブル、USB Type-C
-6. 電力供給、USB PD、役割交渉
-7. USB 3.2、USB4、その前後関係
-8. デバイスクラス、ドライバ、OS の見え方
-9. `TraceDock` を実装視点で読む
-10. 解析、テスト、コンプライアンス
-11. 長く保守できる USB 製品設計
+1. USB を規格として読むための見取り図
+2. USB 2.0 の基本モデル
+3. 列挙と USB 2.0 仕様のデバイスフレームワーク
+4. descriptor の読み方と host の判断
+5. transfer type と scheduling
+6. device class、driver、OS の見え方
+7. USB 3.2 と高速側の論点
+8. USB Type-C の配線、CC、役割、ケーブル
+9. USB Power Delivery と PD コントローラの実務
+10. USB4、Thunderbolt 互換、DisplayPort Alt Mode
+11. 観測手法、試験、コンプライアンス
+12. 実装・解析・長期保守
 
 ## 詳細構成
 
-### 1. USB を仕様から理解するための見取り図
+### 1. USB を規格として読むための見取り図
 
-- 1-1. USB をコネクタ名で覚えない
-- 1-2. データ、電力、役割、世代の話を分ける
-- 1-3. `境界で切り分け、観測点を持つ`
-- 1-4. 本書の対象範囲
-- 1-5. 通しサンプル `TraceDock` の紹介
+- 1-1. USB をコネクタ名や marketing 名で覚えない
+- 1-2. データ、電力、役割、世代、映像、互換の話を分ける
+- 1-3. `仕様` `観測` `ハード前提` の 3 本柱
+- 1-4. 本書で扱う範囲と扱わない範囲
+- 1-5. どの規格書をどの目的で読むか
 
-### 2. バス、トポロジ、ホストとデバイスの役割
+### 2. USB 2.0 の基本モデル
 
-- 2-1. host、hub、device をどう見るか
-- 2-2. endpoint と interface の考え方
-- 2-3. USB 2.0 時代の基本トポロジ
-- 2-4. role の混同を避ける
-- 2-5. USB が壊れる場所はどこか
+- 2-1. host、hub、device、interface、endpoint
+- 2-2. host 主導という前提
+- 2-3. port、address、configuration の役割
+- 2-4. bus power と default power
+- 2-5. 何が物理層で、何が論理層か
 
-### 3. 列挙、descriptor、USB 2.0 仕様 Chapter 9 の基本
+### 3. 列挙と USB 2.0 仕様のデバイスフレームワーク
 
-- 3-1. attach から enumeration までの流れ
-- 3-2. device descriptor、configuration descriptor、string descriptor
-- 3-3. interface と endpoint の見え方
-- 3-4. request と status stage
-- 3-5. descriptor を読めるようになる価値
+- 3-0. USB 2.0 規格書第9章とは何か
+- 3-1. attach から reset まで
+- 3-2. GET_DESCRIPTOR と SET_ADDRESS
+- 3-3. setup / data / status stage
+- 3-4. どこで止まると何を疑うか
+- 3-5. analyzer や dump で見るべき最小単位
+- 3-6. ケーススタディ: 列挙が途中で崩れるとき
 
-### 4. 転送方式とスケジューリング
+### 4. descriptor の読み方と host の判断
 
-- 4-1. control、bulk、interrupt、isochronous の違い
-- 4-2. 帯域、遅延、再送の考え方
-- 4-3. polling と host 主導
-- 4-4. 何をどの転送へ載せるか
-- 4-5. 転送方式の選択がデバッグへ与える影響
+- 4-1. device / configuration / interface / endpoint descriptor
+- 4-2. class を device に置くか interface に置くか
+- 4-3. string descriptor と識別情報
+- 4-4. 電力値、interface 数、endpoint 定義の見方
+- 4-5. descriptor の崩れが driver 問題に見える場面
+- 4-6. descriptor dump を行単位で読む
 
-### 5. コネクタ、ケーブル、USB Type-C
+### 5. transfer type と scheduling
 
-- 5-1. Standard-A/B、Micro-USB、Type-C の役割差
-- 5-2. Type-C は形状だけの話ではない
-- 5-3. cable quality と signal path
-- 5-4. alternate mode と USB の切り分け
-- 5-5. 物理層の問題を論理層のせいにしない
+- 5-1. control / bulk / interrupt / isochronous の契約差
+- 5-2. 帯域、遅延、再送、完全性
+- 5-3. polling と host 側 scheduling
+- 5-4. 何をどの transfer に載せるべきか
+- 5-5. transfer の選び方が debug に与える影響
+- 5-6. ケーススタディ: bulk は遅いが壊れてはいない
 
-### 6. 電力供給、USB PD、役割交渉
+### 6. device class、driver、OS の見え方
 
-- 6-1. USB の電力をデータ転送の延長で見ない
-- 6-2. source、sink、power role
-- 6-3. USB PD 3.2 と EPR
-- 6-4. Type-C と PD の関係
-- 6-5. 電力交渉の失敗をどう見るか
+- 6-1. class / subclass / protocol の役割
+- 6-2. HID、CDC、MSC、vendor-specific
+- 6-3. Windows / macOS / Linux での見え方差
+- 6-4. class 準拠と独自実装の分岐
+- 6-5. driver 問題と descriptor 問題をどう分けるか
+- 6-6. host 側サポートコストの見積もり
 
-### 7. USB 3.2、USB4、その前後関係
+### 7. USB 3.2 と高速側の論点
 
-- 7-1. USB 2.0 と USB 3.x を混同しない
-- 7-2. USB 3.2 の naming と lane
-- 7-3. backwards compatibility の実態
-- 7-4. USB4 をどこまで知ればよいか
-- 7-5. 世代差分を marketing 文言で理解しない
+- 7-1. USB 2.0 と USB 3.x の重なり方
+- 7-2. Gen1 / Gen2 / lane の考え方
+- 7-3. cable、hub、host controller が増やす観測点
+- 7-4. backwards compatibility の実態
+- 7-5. 高速側だけ不安定になるときの見方
+- 7-6. marketing 文言と仕様上の能力を分ける
 
-### 8. デバイスクラス、ドライバ、OS の見え方
+### 8. USB Type-C の配線、CC、役割、ケーブル
 
-- 8-1. class、subclass、protocol の役割
-- 8-2. HID、MSC、CDC の代表例
-- 8-3. class 準拠と vendor-specific の分岐
-- 8-4. OS ごとの差がどこで出るか
-- 8-5. ドライバ問題と descriptor 問題を切り分ける
+- 8-1. USB Type-C connector の信号群
+- 8-2. CC1 / CC2、VBUS、VCONN、SBU
+- 8-3. Rp / Rd / Ra と attach 判定
+- 8-4. source / sink、DFP / UFP、DRP
+- 8-5. cable orientation、mux、e-marker
+- 8-6. DisplayPort Alt Mode や USB4 の入口としての Type-C
 
-### 9. `TraceDock` を実装視点で読む
+### 9. USB Power Delivery と PD コントローラの実務
 
-- 9-1. どの descriptor を持たせるか
-- 9-2. HID 制御と bulk ログ転送の分離
-- 9-3. 電力設計と Type-C 前提の制約
-- 9-4. host 側ツールの責務
-- 9-5. 仕様を最小限に絞る
+- 9-1. Type-C と PD は何が違うか
+- 9-2. source capabilities、sink capabilities、PDO
+- 9-3. explicit contract と role swap
+- 9-4. EPR と高電力化
+- 9-5. PD controller / port controller / PMIC の役割
+- 9-6. PD チップが返す status、fault、capability 情報
+- 9-7. ケーススタディ: attach はするが期待機能へ入らない
 
-### 10. 解析、テスト、コンプライアンス
+### 10. USB4、Thunderbolt 互換、DisplayPort Alt Mode
 
-- 10-1. どこまで analyzer が必要か
-- 10-2. xHCI interop と electrical test の違い
-- 10-3. ログ、descriptor dump、power trace の見方
-- 10-4. 再現手順と切り分け
-- 10-5. 認証と実装品質を混同しない
+- 10-1. USB4 は何を追加するか
+- 10-2. USB4 discovery と entry
+- 10-3. Thunderbolt 3 compatibility の位置づけ
+- 10-4. DisplayPort Alt Mode で映像が出る仕組み
+- 10-5. 映像、USB、電力が同じ Type-C で競合する場面
+- 10-6. dock、hub、cable で結果が変わる理由
 
-### 11. 長く保守できる USB 製品設計
+### 11. 観測手法、試験、コンプライアンス
 
-- 11-1. 規格の全部を一度に実装しない
-- 11-2. host 側と device 側の責務を固定する
-- 11-3. ケーブル依存、OS 依存、電力依存を見える化する
-- 11-4. 仕様更新への追従方法
-- 11-5. USB を選ばない判断も持つ
+- 11-1. usbmon、Wireshark、USBPcap、tshark
+- 11-2. descriptor dump と OS 標準ツール
+- 11-3. protocol analyzer が必要になる境界
+- 11-4. xHCI interop と electrical test の違い
+- 11-5. 再現条件をどう残すか
+- 11-6. 認証と実装品質を混同しない
+
+### 12. 実装・解析・長期保守
+
+- 12-1. 最小成立構成を先に決める
+- 12-2. host 側と device 側の責務分離
+- 12-3. cable、OS、power 条件を記録する
+- 12-4. 規格更新をどう監視するか
+- 12-5. USB を選ばない判断も持つ
+- 12-6. 仕様を読めることを現場価値へ変える
+
+## 付録案
+
+### 付録 A. descriptor dump の読み方
+
+- A-1. device descriptor の行ごとの見方
+- A-2. configuration tree の追い方
+- A-3. class と endpoint の対応をどう確認するか
+
+### 付録 B. 観測ログの読み方
+
+- B-1. setup / data / status stage の追い方
+- B-2. Wireshark / usbmon の基本表示
+- B-3. 症状から最初に見る evidence
+
+### 付録 C. USB Type-C / PD の最小ハード前提
+
+- C-1. CC1 / CC2、VBUS、VCONN、SBU
+- C-2. Rp / Rd / Ra の意味
+- C-3. PD controller の status と fault
+
+### 付録 D. HID と USB ゲームコントローラー
+
+- D-1. HID class を USB 規格の中でどう位置づけるか
+- D-2. joystick / gamepad の report descriptor の考え方
+- D-3. button、axis、hat switch をどう表現するか
+- D-4. OS からどう見えるか
+- D-5. よくある不具合と切り分け
 
 ## 各章の要点
 
-- 1章: USB を「形状」ではなく「層の重なり」として捉え直す
-- 2章: host、device、endpoint、role の基本を整理する
-- 3章: 列挙と descriptor を読む力を土台にする
-- 4章: 4 種類の転送方式を、性能とデバッグの観点で整理する
-- 5章: Type-C とケーブル問題を物理層の現実として扱う
-- 6章: USB PD と power role を、データ転送とは別の軸として理解する
-- 7章: USB 3.2 と USB4 の位置づけを marketing 名称から切り離して整理する
-- 8章: class と driver の関係を OS 観点で見る
-- 9章: `TraceDock` を使って実装時の選択を具体化する
-- 10章: 解析、テスト、コンプライアンスを切り分ける
-- 11章: 長期保守と仕様追従の考え方で閉じる
+- 1章: USB を読む地図を作る
+- 2章: USB 2.0 の土台を固める
+- 3章: 列挙と USB 2.0 仕様のデバイスフレームワークを観測可能な形で理解する
+- 4章: descriptor を host 判断の契約書として読む
+- 5章: transfer を性能表ではなく契約差として理解する
+- 6章: class、driver、OS 差分を実務へ引き戻す
+- 7章: USB 3.2 と高速側の追加論点を切り分ける
+- 8章: Type-C の配線と役割の基礎を押さえる
+- 9章: PD と PD controller の実務観測点を理解する
+- 10章: USB4、Thunderbolt、Alt Mode を現代 USB の文脈へ置く
+- 11章: 観測、試験、コンプライアンスの境界を整理する
+- 12章: 実装と保守の原則で閉じる
 
 ## 他書との役割分担メモ
 
 - `Git & GitHub` の変更管理やレビュー手法は再説明しない
-- `Hermes Agent` のような OSS ツール側の USB デバイス利用には触れても、AI エージェントの説明へは逸れない
-- `Raspberry Pi` や `OBS` と将来役割が重なっても、本書は USB そのものの理解と解析を主軸にする
-- Type-C と PD は重要だが、それ自体の完全な分冊本へは踏み込まず、USB を理解するための範囲へ絞る
+- `Raspberry Pi` 本で周辺機器活用に触れても、本書は USB 規格そのものの理解を主軸にする
+- `OBS` や映像周辺機器と接点があっても、本書では DisplayPort Alt Mode や UVC の境界に留める
+- Type-C や PD は深いが、本書では USB を理解するために必要な範囲を優先する
+- HID の詳細は本筋ではないが、USB 接続のゲームコントローラーを付録で具体例として扱う
 
 ## 本文着手順
 
-1. 1章で USB を読むための視点と `TraceDock` を定義する
-2. 2章から4章で bus、enumeration、transfer の土台を固める
-3. 5章から7章で connector、Type-C、PD、世代差分を整理する
-4. 8章から10章で class、実装、解析、コンプライアンスをつなぐ
-5. 11章で保守と仕様追従の原則として閉じる
+1. 1章から5章で USB 2.0 の土台と descriptor / transfer を固める
+2. 6章と7章で class と高速側の論点を整理する
+3. 8章から10章で Type-C、PD、USB4、Thunderbolt、Alt Mode をつなぐ
+4. 11章で観測と試験を厚くする
+5. 12章で実装・解析・保守の原則として閉じる

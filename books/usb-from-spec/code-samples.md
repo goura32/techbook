@@ -8,7 +8,7 @@
 ## 方針
 
 - 本文では短い descriptor 断片、transfer 例、host 側コード断片だけを載せる
-- `TraceDock` の全体像は付録へ寄せ、本文は判断軸の説明を優先する
+- ベンダ固有の長い実装例は付録へ寄せ、本文は判断軸の説明を優先する
 - firmware と host 側コードは、どちらか一方だけで完結したように見せない
 - bus capture は 1 パケット単位より、何を見るべきかが伝わる粒度にとどめる
 
@@ -21,7 +21,8 @@
 
 ## 付録へ置くもの
 
-- `TraceDock` の descriptor マップ
+- descriptor dump の行ごとの読み方
+- generic HID gamepad の report descriptor 断片
 - capture log の読み方
 - firmware 更新や debug の長めの断片
 

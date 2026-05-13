@@ -10,17 +10,18 @@
 
 | 章 | 状態 | メモ |
 | --- | --- | --- |
-| 1 | 本文推敲済み | `TraceDock` と本書の視点を導入済み |
-| 2 | 本文推敲済み | host、hub、device、endpoint を整理済み |
-| 3 | 本文推敲済み | 列挙と descriptor を具体例付きで補強済み |
-| 4 | 本文推敲済み | 転送方式の使い分けを整理済み |
-| 5 | 本文推敲済み | Type-C と cable 問題を実例付きで補強済み |
-| 6 | 本文推敲済み | USB PD と role 交渉を具体例付きで補強済み |
-| 7 | 本文推敲済み | USB 3.2、USB4 の位置づけを整理済み |
-| 8 | 本文推敲済み | class、driver、OS 差分を具体例付きで補強済み |
-| 9 | 本文推敲済み | `TraceDock` の実装判断を設計例として補強済み |
-| 10 | 本文推敲済み | 解析ログと試験観点を具体例付きで補強済み |
-| 11 | 本文推敲済み | 長期保守と仕様追従で閉じた |
+| 1 | 本文推敲済み | 規格解説主役の導入として整理済み |
+| 2 | 本文推敲済み | USB 2.0 の基本モデルとして整理済み |
+| 3 | 本文推敲済み | device framework と観測を整理済み |
+| 4 | 本文推敲済み | descriptor を独立章として整理済み |
+| 5 | 本文推敲済み | transfer と scheduling を整理済み |
+| 6 | 本文推敲済み | class、driver、OS 差分を整理済み |
+| 7 | 本文推敲済み | USB 3.2 と高速側の論点を整理済み |
+| 8 | 本文推敲済み | Type-C の配線、CC、役割、ケーブルを整理済み |
+| 9 | 本文推敲済み | PD と PD controller の実務を整理済み |
+| 10 | 本文推敲済み | USB4、Thunderbolt 互換、Alt Mode を整理済み |
+| 11 | 本文推敲済み | 観測、試験、コンプライアンスを整理済み |
+| 12 | 本文推敲済み | 実装、解析、長期保守で閉じた |
 
 ## 制作メモ
 
@@ -28,8 +29,7 @@
 - 図表ラフ: [figures-roughs.md](/Users/goura32/techbook/books/usb-from-spec/figures-roughs.md)
 - 図表清書下書き: [figures-final.md](/Users/goura32/techbook/books/usb-from-spec/figures-final.md)
 - コード掲載方針: [code-samples.md](/Users/goura32/techbook/books/usb-from-spec/code-samples.md)
-- `TraceDock` 付録: [appendix-tracedock-structure.md](/Users/goura32/techbook/books/usb-from-spec/appendix-tracedock-structure.md), [appendix-descriptor-map.md](/Users/goura32/techbook/books/usb-from-spec/appendix-descriptor-map.md)
-- `TraceDock` 代表断片: [appendix-capture-and-debug-fragments.md](/Users/goura32/techbook/books/usb-from-spec/appendix-capture-and-debug-fragments.md)
+- 付録: [appendix-descriptor-map.md](/Users/goura32/techbook/books/usb-from-spec/appendix-descriptor-map.md), [appendix-capture-and-debug-fragments.md](/Users/goura32/techbook/books/usb-from-spec/appendix-capture-and-debug-fragments.md), [appendix-typec-pd-hardware-basics.md](/Users/goura32/techbook/books/usb-from-spec/appendix-typec-pd-hardware-basics.md), [appendix-hid-game-controllers.md](/Users/goura32/techbook/books/usb-from-spec/appendix-hid-game-controllers.md)
 - レイアウト確認メモ: [layout-review.md](/Users/goura32/techbook/books/usb-from-spec/layout-review.md)
 - 原稿全体構成: [manuscript-structure.md](/Users/goura32/techbook/books/usb-from-spec/manuscript-structure.md)
 - 最終整形チェック: [final-assembly-checklist.md](/Users/goura32/techbook/books/usb-from-spec/final-assembly-checklist.md)
@@ -37,7 +37,6 @@
 - 参考情報方針: [reference-policy.md](/Users/goura32/techbook/books/usb-from-spec/reference-policy.md)
 - 前付: [front-matter.md](/Users/goura32/techbook/books/usb-from-spec/front-matter.md)
 - 後付: [back-matter.md](/Users/goura32/techbook/books/usb-from-spec/back-matter.md)
-- 通しサンプル: `TraceDock`
 - 公開名: `大島 のりあ`
 - 連絡先メールアドレス: `noria.library@gmail.com`
 - 発行日: `2026年5月13日` を仮設定

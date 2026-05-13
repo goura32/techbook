@@ -1,58 +1,59 @@
-# 3章 列挙、descriptor、USB 2.0 仕様 Chapter 9 の基本
+# 3章 列挙と USB 2.0 仕様のデバイスフレームワーク
 
-USB を実装、解析、デバッグするときに最初の土台になるのが enumeration です。device が物理的につながったあと、host は何がつながったのかを知る必要があります。そのために descriptor を読み、address を割り当て、configuration を選びます。この一連の流れが曖昧だと、class や driver の話へ進んでも足場が不安定になります。
+この章で扱う `USB 2.0 仕様のデバイスフレームワーク` は、規格書上ではしばしば `USB 2.0 規格書第9章` と呼ばれる部分です。ここには standard request、device state、descriptor 読み出し、address と configuration の基本が入っています。USB の列挙を理解するなら、まずこの枠組みを押さえるのが近道です。
 
-重要なのは、enumeration は「認識したら終わり」の儀式ではないということです。host と device が契約を結ぶ最初の場面です。device descriptor はデバイス全体の入口であり、configuration descriptor は構成全体を示し、interface descriptor は機能の単位を、endpoint descriptor は転送口の性質を表します。descriptor は説明文ではなく、host が振る舞いを決めるための材料です。
+## 3-1. `USB 2.0 規格書第9章` とは何か
 
-`TraceDock` を例にすると、host はまず device 全体を見て、続いて configuration tree を読み、その中に HID control interface と bulk logging interface があることを知ります。この構造が整っていれば、host 側ツールは「制御は HID、ログ取得は bulk」と自然に役割を分けられます。逆に descriptor が曖昧だと、実装は動いていても host 側で扱いにくくなります。
+ここでいう `USB 2.0 規格書第9章` は本書の 9章ではなく、USB 2.0 規格書の一章です。中身は `USB device framework`、つまり `host が device をどう認識し、standard request でどう会話するか` です。読者が知るべきなのは章番号そのものではなく、`列挙の基本契約はここに書かれている` という事実です。
 
-実際の流れをもう少し現実的に言うと、host は attach を検知したあと reset をかけ、まず短い device descriptor を読み、device address を割り当て、そのあと configuration tree 全体を取得します。ここで最初に返る descriptor が壊れていると、後ろにどれだけ立派な interface 設計があっても host には届きません。enumeration は階段状に進むので、前段が壊れると後段は一切見えない、という感覚を持つことが大切です。
+## 3-2. attach から set configuration まで
 
-典型的な control request の往復を、`TraceDock` のような device で単純化すると次のようになります。
+典型的な流れは次のとおりです。
 
-```text
-Host -> GET_DESCRIPTOR(Device, 8 bytes)
-Device -> 最初の 8 bytes を返す
-Host -> SET_ADDRESS
-Device -> ACK
-Host -> GET_DESCRIPTOR(Device, full)
-Host -> GET_DESCRIPTOR(Configuration, partial/full)
-Host -> SET_CONFIGURATION
-```
+1. attach を検知する
+2. bus reset をかける
+3. device descriptor の先頭を読む
+4. address を割り当てる
+5. descriptor 全体と configuration tree を読む
+6. set configuration で使用構成を決める
 
-この順番を覚える価値は、packet の暗記ではなく、どこで止まったときに何を疑うかが見えるようになることです。たとえば最初の 8 bytes すら読めないなら、class や driver の問題ではなく、もっと手前の bus reset、pull-up、power、cable、PHY 初期化を疑うべきです。逆に configuration tree までは読めるのに driver が当たらないなら、descriptor 内容や class 設計の問題へ寄りやすくなります。
+この流れは階段状です。前段が崩れると後段は一切見えません。だから `OS で class が見えない` 問題でも、実はもっと手前の reset や descriptor 読み出しで止まっていることがあります。
 
-USB 2.0 仕様の Chapter 9 を理解するときに特に大切なのは、request の流れです。setup stage、data stage、status stage という control transfer の基本形は、enumeration のあちこちで現れます。ここを知らないと、analyzer のログを見ても何が成功し、何が失敗したのかが追いにくくなります。本文では詳細な packet 列挙までは踏み込みませんが、どの段階で止まると何を疑うべきかは押さえます。
+## 3-3. setup / data / status stage
 
-setup stage では host が何を欲しているかを宣言し、data stage で実データが流れ、status stage でその要求が閉じます。この 3 段階は単なる形式ではなく、「要求」「内容」「完了」の境界です。analyzer で見ると短い往復ですが、ここでの失敗は切り分けに直結します。setup packet 自体が妥当か、期待した長さの data が返っているか、status まで閉じているかを順に見るだけでも、かなりの情報が取れます。
+control transfer の基本形は `setup` `data` `status` の 3 段階です。setup で host が何を欲しているかを宣言し、data で実データが流れ、status で要求が閉じます。この順を理解していると、Wireshark や analyzer のログで `どこまで進んだか` をすぐ判断できます。
 
-descriptor を読めるようになる価値は大きいです。OS や driver のせいに見える問題のかなりの割合が、実際には descriptor の設計や整合性にあります。class の置き方、endpoint の転送方式、power 値、interface の切り方。こうした情報は host から見える唯一の正式な自己申告です。device が自分をどう名乗るかが、そのまま挙動に効きます。
+たとえば `SETUP までは見えるが DATA が崩れる` なら、request の意味の理解不足というより、応答長や初期 packet size の前提を疑うほうが近道です。逆に status まで閉じるのに class 初期化へ進まないなら、descriptor や host 側 binding を優先して見るべきです。
 
-特に誤りやすいのは、「device 全体の class と interface ごとの class のどちらへ意味を置くか」「configuration の電力値と実際の振る舞いが合っているか」「endpoint descriptor の transfer type と firmware 実装が一致しているか」です。ここがずれると、OS 側では違う class と解釈されたり、そもそも interface を開きにくくなったりします。descriptor はたいてい短いので軽く見られますが、ここが最も濃い契約書です。
+## 3-4. どこで止まると何を疑うか
 
-`TraceDock` の configuration tree を文章で表すなら、こんな考え方になります。
+列挙停止の見方はある程度パターン化できます。
 
-- Device:
-  - USB device 全体の識別
-- Configuration 1:
-  - Interface 0:
-    - HID control
-    - 小さな command / status
-  - Interface 1:
-    - Bulk logging
-    - 継続的なログ転送
+- reset 前後で反応しない
+  power、pull-up、port、cable、PHY を疑う
+- device descriptor の途中で崩れる
+  応答長、`bMaxPacketSize0`、control transfer 実装を疑う
+- configuration tree 取得後に進まない
+  descriptor 整合性、interface / endpoint の定義を疑う
+- set configuration 後にだけ問題が出る
+  class 初期化、endpoint enable、driver binding を疑う
 
-この分離があると、host 側は「最小限の制御は driver 友好的に」「大きなログは完全性重視で」という設計を自然に理解できます。逆に interface を分けずに vendor-specific のひと塊で出すと、device 側は簡単でも host 側は扱いづらくなります。
+USB の debug が機械的に進めやすいのは、このように停止位置と疑う層を結びつけられるからです。
 
-enumeration で止まるときの見方も、ある程度パターン化できます。
+## 3-5. 観測で見るべき最小単位
 
-- reset 後にまったく反応しない:
-  - power、pull-up、PHY、cable、port 側を疑う
-- device descriptor の途中で崩れる:
-  - descriptor 長、firmware 応答、max packet size 周辺を疑う
-- configuration 取得後に class が不自然:
-  - interface / endpoint descriptor の整合性を疑う
-- set configuration 後にだけ問題が出る:
-  - class 固有初期化、endpoint enable、host driver binding を疑う
+この章で最低限見られるようになりたいのは、`GET_DESCRIPTOR` `SET_ADDRESS` `SET_CONFIGURATION` の流れです。packet を全部暗記する必要はありませんが、
 
-こうした切り分けを持っているだけで、USB の debug はかなり機械的に進められます。付録 B には、`TraceDock` の descriptor と class の対応を整理しています。configuration tree を見失いそうになったときに戻ると役立ちます。次の章では、enumeration の先にある 4 種類の転送方式を整理し、どの機能をどの transfer に載せるべきかを見ていきます。
+- どの request が出たか
+- 期待した長さの data が返ったか
+- status まで閉じたか
+
+の 3 点が見えるだけで、かなり多くの問題を絞り込めます。
+
+## 3-6. generic HID gamepad を例にすると
+
+generic HID gamepad でも、この章の流れは変わりません。host はまず device を認識し、configuration tree から `HID interface` と `interrupt endpoint` を見つけ、そこから report を読む準備へ入ります。つまり `ゲームコントローラーが OS に見えない` ときも、最初に見るべきは HID 独自の話ではなく、この device framework の段階です。
+
+## 3-7. この章のまとめ
+
+列挙は `認識したら終わり` の儀式ではありません。host と device が最初に契約を結ぶ場面です。どこで止まったかを見られるようになるだけで、USB の問題はかなり分解しやすくなります。次の章では、その契約書そのものである descriptor を、host の判断材料として読み解きます。

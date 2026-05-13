@@ -1,48 +1,29 @@
-# Appendix C. capture、dump、debug の代表断片
+# 付録 B. 観測ログの読み方
 
 ## この付録の役割
 
-付録 A は `TraceDock` の構造、付録 B は descriptor と class の対応を整理するためのものでした。この付録 C では、本文で断片的に登場した capture や debug の例を、もう少し連続した形で確認できるようにします。
+本文 11章では、`usbmon` `Wireshark` `USBPcap` `descriptor dump` `OS 標準ツール` を観測点として整理しました。この付録では、実際にどんな断片を見て、どこまで判断すればよいかを短い例で確認します。
 
-## 1. device descriptor を読む
-
-```text
-Device Descriptor:
-  idVendor           0x1209
-  idProduct          0x0001
-  bNumConfigurations 0x01
-  bMaxPacketSize0    0x40
-```
-
-ここで大事なのは、まず device 全体が見えているかを確認することです。class が interface 側にある設計なら、device descriptor だけを見て結論を急がないほうが安全です。`bMaxPacketSize0` のような初期列挙に効く値は、最初の往復が成立するかどうかに直結します。
-
-## 2. configuration tree を読む
+## B-1. setup / data / status stage
 
 ```text
-Configuration 1
-  Interface 0: HID Control
-  Interface 1: Bulk Logging
-  Endpoint 1 IN: Interrupt
-  Endpoint 2 IN: Bulk
-```
-
-interface の分け方は、そのまま host 側の責務分離につながります。endpoint の種類が設計意図と一致しているかも、ここで最初に確認します。
-
-ここで見たいのは「機能があるか」だけではありません。最低限の制御経路と、重いログ経路が分かれているかを見ると、異常時にどこまで観測を続けられるかも判断できます。
-
-## 3. control request の流れを見る
-
-```text
-SETUP bmRequestType=0x80 bRequest=GET_DESCRIPTOR
-DATA  Descriptor bytes...
+SETUP  bmRequestType=0x80 bRequest=GET_DESCRIPTOR
+DATA   12 01 00 02 ...
 STATUS ACK
 ```
 
-enumeration の問題は、この流れのどこで止まっているかを見るだけでもかなり切り分けが進みます。SETUP まで見えるのか、DATA が途中で崩れるのか、STATUS まで閉じるのかで、疑う層が変わります。
+最初に見たいのは、`request が出たか` `data が返ったか` `status まで閉じたか` です。全部の byte を暗記しなくても、この 3 点が見えれば列挙のどこで止まったかをかなり説明できます。
 
-たとえば SETUP は見えるのに DATA が途中で崩れるなら、request の意味を理解していないというより、応答長や初期 packet size の前提を疑うほうが早いです。逆に STATUS まで閉じるのに class 初期化へ進まないなら、descriptor tree や host 側 binding の問題へ重心を移せます。
+## B-2. descriptor dump と組み合わせる
 
-## 4. bulk transfer の詰まり方を見る
+```text
+lsusb: HID interface present
+descriptor dump: bNumInterfaces = 1
+```
+
+OS の一覧と descriptor dump を並べるだけでも、`OS には見えているが class 解釈が崩れている` のか、`そもそも interface 数が違う` のかを分けやすくなります。
+
+## B-3. bulk transfer の詰まり
 
 ```text
 OUT bulk queue full
@@ -50,9 +31,9 @@ retry count increased
 host timeout threshold reached
 ```
 
-bulk は完全性を優先するので、遅いこと自体が直ちに異常とは限りません。遅延と欠損を分けて考えます。queue 詰まりが firmware 側か host 側かを分けて見ることも重要です。
+bulk は完全性優先なので、遅いこと自体は直ちに異常ではありません。遅延と欠損を分け、queue が device 側で詰まっているか host 側で詰まっているかを見ます。
 
-## 5. power negotiation の前提を確認する
+## B-4. PD contract の不成立
 
 ```text
 Type-C attached
@@ -61,20 +42,26 @@ PD contract not established
 Requested power profile denied
 ```
 
-Type-C で接続されていても、PD 契約が必ず成立しているとは限りません。attach 成功と contract 成功を別イベントとして見ると、切り分けがかなり楽になります。
+attach 成功と contract 成功は別です。`高機能モードだけ無効` のような症状では、enumeration を全部疑う前に power contract を見たほうが近道です。
 
-ここで高機能モードだけが無効なら、enumeration 全体を疑う前に power budget を見たほうが近道です。商用製品では「動かない」ではなく、「最低限は動くが拡張だけ落ちる」という症状がよくあるためです。
-
-## 6. host 側の見え方をそろえる
+## B-5. generic HID gamepad の観測
 
 ```text
-lsusb: two interfaces listed
-device manager: HID present
-vendor tool: logging endpoint unavailable
+Interface 0: HID Gamepad
+Endpoint 1 IN: Interrupt
+Input Report: buttons, X/Y axes, hat switch
 ```
 
-同じ device でも、host 側の見え方は道具ごとに違います。だからこそ、descriptor dump、OS の一覧、専用ツールの表示を並べて読むと、「enumeration は成功しているが logging 経路だけ死んでいる」のような状態を説明しやすくなります。
+ゲームコントローラーのような題材では、descriptor dump、HID report、OS の入力一覧を並べると、`列挙` `class` `report 解釈` がどこで崩れているかをかなり説明しやすくなります。
 
-## 7. debug の順番を固定する
+## B-6. 観測の順番を固定する
 
-重要なのは、いきなり firmware バグだと決めつけないことです。power、cable、enumeration、descriptor、class、application の順に切り分けるだけでも、無駄な調査は大きく減ります。商用現場では「どの証拠を見て次にどこへ進むか」が固定されているだけで、再現性と説明責任が大きく上がります。
+USB の debug で大切なのは、最初に見る順番を固定することです。
+
+1. power / cable
+2. 列挙
+3. descriptor
+4. class / OS の見え方
+5. application logic
+
+この順だけでも、無駄な調査はかなり減ります。

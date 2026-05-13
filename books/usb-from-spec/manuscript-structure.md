@@ -12,8 +12,8 @@
 2. 扉
 3. はじめに
 4. 目次
-5. 本文 1章から11章
-6. 付録 A から C
+5. 本文 1章から12章
+6. 付録 A から D
 7. おわりに
 8. 参考情報
 9. 著者紹介
@@ -30,23 +30,25 @@
 
 ### 本文
 
-1. 1章 `USB を仕様から理解するための見取り図`
-2. 2章 `バス、トポロジ、ホストとデバイスの役割`
-3. 3章 `列挙、descriptor、USB 2.0 仕様 Chapter 9 の基本`
-4. 4章 `転送方式とスケジューリング`
-5. 5章 `コネクタ、ケーブル、USB Type-C`
-6. 6章 `電力供給、USB PD、役割交渉`
-7. 7章 `USB 3.2、USB4、その前後関係`
-8. 8章 `デバイスクラス、ドライバ、OS の見え方`
-9. 9章 `TraceDock` を実装視点で読む
-10. 10章 `解析、テスト、コンプライアンス`
-11. 11章 `長く保守できる USB 製品設計`
+1. 1章 `USB を規格として読むための見取り図`
+2. 2章 `USB 2.0 の基本モデル`
+3. 3章 `列挙と USB 2.0 仕様のデバイスフレームワーク`
+4. 4章 `descriptor の読み方と host の判断`
+5. 5章 `transfer type と scheduling`
+6. 6章 `device class、driver、OS の見え方`
+7. 7章 `USB 3.2 と高速側の論点`
+8. 8章 `USB Type-C の配線、CC、役割、ケーブル`
+9. 9章 `USB Power Delivery と PD コントローラの実務`
+10. 10章 `USB4、Thunderbolt 互換、DisplayPort Alt Mode`
+11. 11章 `観測手法、試験、コンプライアンス`
+12. 12章 `実装・解析・長期保守`
 
 ### 付録
 
-1. 付録 A `TraceDock の全体構成`
-2. 付録 B `descriptor と class の対応`
-3. 付録 C `capture、dump、debug の代表断片`
+1. 付録 A `descriptor dump の読み方`
+2. 付録 B `観測ログの読み方`
+3. 付録 C `USB Type-C / PD の最小ハード前提`
+4. 付録 D `HID と USB ゲームコントローラー`
 
 ### 後付
 
@@ -62,20 +64,22 @@
 - 1章: [01-why-usb-from-spec.md](/Users/goura32/techbook/books/usb-from-spec/chapters/01-why-usb-from-spec.md)
 - 2章: [02-bus-topology-and-roles.md](/Users/goura32/techbook/books/usb-from-spec/chapters/02-bus-topology-and-roles.md)
 - 3章: [03-enumeration-and-descriptors.md](/Users/goura32/techbook/books/usb-from-spec/chapters/03-enumeration-and-descriptors.md)
-- 4章: [04-transfer-types-and-scheduling.md](/Users/goura32/techbook/books/usb-from-spec/chapters/04-transfer-types-and-scheduling.md)
-- 5章: [05-connectors-cables-and-type-c.md](/Users/goura32/techbook/books/usb-from-spec/chapters/05-connectors-cables-and-type-c.md)
-- 6章: [06-power-delivery-and-power-rules.md](/Users/goura32/techbook/books/usb-from-spec/chapters/06-power-delivery-and-power-rules.md)
-- 7章: [07-usb-32-usb4-and-generation-gaps.md](/Users/goura32/techbook/books/usb-from-spec/chapters/07-usb-32-usb4-and-generation-gaps.md)
-- 8章: [08-device-classes-drivers-and-os-behavior.md](/Users/goura32/techbook/books/usb-from-spec/chapters/08-device-classes-drivers-and-os-behavior.md)
-- 9章: [09-implementing-tracedock.md](/Users/goura32/techbook/books/usb-from-spec/chapters/09-implementing-tracedock.md)
-- 10章: [10-debugging-testing-and-compliance.md](/Users/goura32/techbook/books/usb-from-spec/chapters/10-debugging-testing-and-compliance.md)
-- 11章: [11-keeping-usb-products-maintainable.md](/Users/goura32/techbook/books/usb-from-spec/chapters/11-keeping-usb-products-maintainable.md)
+- 4章: [04-reading-descriptors-and-host-decisions.md](/Users/goura32/techbook/books/usb-from-spec/chapters/04-reading-descriptors-and-host-decisions.md)
+- 5章: [05-transfer-types-and-scheduling.md](/Users/goura32/techbook/books/usb-from-spec/chapters/05-transfer-types-and-scheduling.md)
+- 6章: [06-device-classes-drivers-and-os-behavior.md](/Users/goura32/techbook/books/usb-from-spec/chapters/06-device-classes-drivers-and-os-behavior.md)
+- 7章: [07-usb-32-and-high-speed-considerations.md](/Users/goura32/techbook/books/usb-from-spec/chapters/07-usb-32-and-high-speed-considerations.md)
+- 8章: [08-usb-type-c-roles-cables-and-cc.md](/Users/goura32/techbook/books/usb-from-spec/chapters/08-usb-type-c-roles-cables-and-cc.md)
+- 9章: [09-usb-power-delivery-and-pd-controllers.md](/Users/goura32/techbook/books/usb-from-spec/chapters/09-usb-power-delivery-and-pd-controllers.md)
+- 10章: [10-usb4-thunderbolt-and-displayport-alt-mode.md](/Users/goura32/techbook/books/usb-from-spec/chapters/10-usb4-thunderbolt-and-displayport-alt-mode.md)
+- 11章: [11-observation-testing-and-compliance.md](/Users/goura32/techbook/books/usb-from-spec/chapters/11-observation-testing-and-compliance.md)
+- 12章: [12-implementation-analysis-and-long-term-maintenance.md](/Users/goura32/techbook/books/usb-from-spec/chapters/12-implementation-analysis-and-long-term-maintenance.md)
 
 ### 付録
 
-- 付録 A: [appendix-tracedock-structure.md](/Users/goura32/techbook/books/usb-from-spec/appendix-tracedock-structure.md)
-- 付録 B: [appendix-descriptor-map.md](/Users/goura32/techbook/books/usb-from-spec/appendix-descriptor-map.md)
-- 付録 C: [appendix-capture-and-debug-fragments.md](/Users/goura32/techbook/books/usb-from-spec/appendix-capture-and-debug-fragments.md)
+- 付録 A: [appendix-descriptor-map.md](/Users/goura32/techbook/books/usb-from-spec/appendix-descriptor-map.md)
+- 付録 B: [appendix-capture-and-debug-fragments.md](/Users/goura32/techbook/books/usb-from-spec/appendix-capture-and-debug-fragments.md)
+- 付録 C: [appendix-typec-pd-hardware-basics.md](/Users/goura32/techbook/books/usb-from-spec/appendix-typec-pd-hardware-basics.md)
+- 付録 D: [appendix-hid-game-controllers.md](/Users/goura32/techbook/books/usb-from-spec/appendix-hid-game-controllers.md)
 
 ### 制作支援
 
@@ -91,14 +95,14 @@
 - はじめに:
   - 本書の目的
   - 想定読者
-  - `TraceDock` を使う理由
+  - 仕様、観測、ハード前提の案内
   - 読み方の案内
-- 本文 1章から4章:
-  - USB の土台編
-- 本文 5章から8章:
-  - Type-C、PD、世代、class の構造編
-- 本文 9章から11章:
-  - 実装、解析、長期保守編
+- 本文 1章から5章:
+  - USB 2.0 の土台編
+- 本文 6章から10章:
+  - class、USB 3.2、Type-C、PD、USB4 の構造編
+- 本文 11章から12章:
+  - 観測、試験、長期保守編
 - おわりに:
   - 本書全体の視点を短く回収する
 
@@ -112,7 +116,7 @@
 ## 組版前チェック
 
 - 章タイトル表記が目次と本文で一致しているか
-- 付録 A / B / C の参照表記が本文と一致しているか
+- 付録 A / B / C / D の参照表記が本文と一致しているか
 - 図表番号と図表キャプションが本文順に並ぶか
 - 前付と後付を入れたあとでページバランスが崩れないか
 

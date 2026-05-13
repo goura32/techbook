@@ -4,59 +4,68 @@
 
 USB の難しさは、仕様が多いことだけではありません。コネクタ、速度、電力、列挙、転送、クラス、OS の見え方が、ひとつのケーブルの中で同時に起きていることにあります。だからこそ、USB を理解するには、全部を暗記することより、どの問題をどの層で切り分けるべきかを掴むことのほうが重要です。
 
-本書では、USB 2.0、USB 3.2、USB Type-C、USB Power Delivery を、規格の歴史順ではなく、実装と解析の観点でつないできました。`TraceDock` は小さな題材でしたが、そこで見てきた列挙、descriptor、転送方式、電力交渉、class、debug の考え方は、より大きな製品や複雑な周辺機器でもそのまま役立ちます。
+本書では、USB 2.0、USB 3.2、USB Type-C、USB Power Delivery、USB4 を、規格の歴史順ではなく、実装と解析の観点でつないできました。途中では generic HID gamepad やゲームコントローラーのような身近な題材も使いましたが、主役はあくまで規格そのものと観測のしかたです。
 
 USB は、知っているつもりの部分ほど誤解が残りやすい技術です。Type-C と USB PD を同じ話だと思ってしまうこと、driver 問題を cable 問題と混同すること、enumeration の失敗を firmware だけの問題だと決めつけること。そうした混線を減らせるだけでも、実務の負担はかなり小さくなります。
 
-ここで扱った考え方が、今後ほかの規格やファイル形式を読むときにも、役割、層、観測点を分けて考えるための土台として残ればうれしく思います。
+ここで扱った考え方が、今後ほかの規格やファイル形式を読むときにも、役割、層、観測点を分けて考えるための土台として残ればうれしく思います。USB を理解する価値は、周辺機器が増えることではなく、複雑な接続のどこで判断を誤りやすいかを見抜けることにあります。
 
 ## 参考情報
 
 ### USB-IF 公式情報
 
-- USB-IF Document Library  
-  種別: 公式ドキュメントライブラリ  
+- USB-IF Document Library
+  種別: 公式ドキュメントライブラリ
   URL: `https://www.usb.org/documents`
-- USB 3.2  
-  種別: 公式技術ページ  
+- USB 3.2
+  種別: 公式技術ページ
   URL: `https://www.usb.org/usb-32`
-- USB Type-C® Cable and Connector Specification  
-  種別: 公式技術ページ  
+- USB Type-C® Cable and Connector Specification
+  種別: 公式技術ページ
   URL: `https://www.usb.org/usb-type-cr-cable-and-connector-specification`
-- USB Charger (USB Power Delivery)  
-  種別: 公式技術ページ  
+- USB Charger (USB Power Delivery)
+  種別: 公式技術ページ
   URL: `https://www.usb.org/usb-charger-pd`
+- DisplayPort over USB-C
+  種別: 公式技術ページ
+  URL: `https://www.displayport.org/displayport-over-usb-c/`
+- usbmon — The Linux Kernel documentation
+  種別: 公式ドキュメント
+  URL: `https://docs.kernel.org/usb/usbmon.html`
+- Wireshark USB capture setup
+  種別: 公式ドキュメント
+  URL: `https://wiki.wireshark.org/CaptureSetup/USB`
 
 ### 本書で特に参照した仕様と試験情報
 
-- USB 2.0 Specification  
-  種別: 公式仕様  
-  日付: 2025年6月3日  
+- USB 2.0 Specification
+  種別: 公式仕様
+  日付: 2025年6月3日
   URL: `https://www.usb.org/documents`
   補足: USB-IF Document Library で資料名を検索
-- USB Type-C® Cable and Connector Specification Release 2.5  
-  種別: 公式仕様  
-  日付: 2026年4月8日  
+- USB Type-C® Cable and Connector Specification Release 2.5
+  種別: 公式仕様
+  日付: 2026年4月8日
   URL: `https://www.usb.org/documents`
   補足: USB-IF Document Library で資料名を検索
-- USB Power Delivery Revision 3.2 Version 1.2  
-  種別: 公式仕様  
-  日付: 2026年3月24日  
+- USB Power Delivery Revision 3.2 Version 1.2
+  種別: 公式仕様
+  日付: 2026年3月24日
   URL: `https://www.usb.org/documents`
   補足: USB-IF Document Library で資料名を検索
-- USB4 Specification Version 2.0  
-  種別: 公式仕様  
-  日付: 2026年4月2日  
+- USB4 Specification Version 2.0
+  種別: 公式仕様
+  日付: 2026年4月2日
   URL: `https://www.usb.org/documents`
   補足: USB-IF Document Library で資料名を検索
-- xHCI Interoperability Test Procedures For Peripherals, Hubs and Hosts  
-  種別: 公式試験仕様  
-  日付: 2025年6月3日  
+- xHCI Interoperability Test Procedures For Peripherals, Hubs and Hosts
+  種別: 公式試験仕様
+  日付: 2025年6月3日
   URL: `https://www.usb.org/documents`
   補足: USB-IF Document Library で資料名を検索
-- USB 2.0 Electrical Compliance Test Specification  
-  種別: 公式試験仕様  
-  日付: 2026年4月21日  
+- USB 2.0 Electrical Compliance Test Specification
+  種別: 公式試験仕様
+  日付: 2026年4月21日
   URL: `https://www.usb.org/documents`
   補足: USB-IF Document Library で資料名を検索
 
@@ -69,7 +78,7 @@ USB は、知っているつもりの部分ほど誤解が残りやすい技術�
 ## 奥付
 
 - 書名: `技術の輪郭 USB`
-- サブタイトル: `列挙、転送、Type-C、PD、解析までを実装視点でつなぐ`
+- サブタイトル: `規格、Type-C、PD、USB4、観測までを実務でつなぐ`
 - シリーズ名: `技術の輪郭`
 - 著者名: `大島 のりあ`
 - 発行日: 2026年5月13日（仮）
