@@ -15,6 +15,7 @@
 - `python-practical`: 技術の輪郭 Python
 - `git-github-practical`: 技術の輪郭 Git & GitHub
 - `hermes-agent-practical`: 技術の輪郭 Hermes Agent
+- `usb-from-spec`: 技術の輪郭 USB
 
 ## 運用ルール
 
