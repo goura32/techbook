@@ -4,20 +4,21 @@
 
 - KDP 向けに、前付・本文・付録・後付を含めた全体構成を固定する
 - 執筆用ファイル群と、組版用原稿の並びを対応づける
-- 最終整形時に不足要素を見失わないようにする
+- 構成刷新後も、本文と付録の役割分担を崩さないようにする
 
 ## 全体構成
 
 1. 表紙
 2. 扉
 3. はじめに
-4. 目次
-5. 本文 1章から12章
-6. 付録 A から C
-7. おわりに
-8. 参考情報
-9. 著者紹介
-10. 奥付
+4. 本書の読み方
+5. 目次
+6. 本文 1章から12章
+7. 付録 A から H
+8. おわりに
+9. 参考情報
+10. 著者紹介
+11. 奥付
 
 ## 組版用の並び
 
@@ -30,24 +31,29 @@
 
 ### 本文
 
-1. 1章 `Hermes Agent とは何か`
-2. 2章 `インストールと最初のセットアップ`
-3. 3章 `モデル、プロバイダ、ツール権限の考え方`
-4. 4章 `CLI を中心とした日常ワークフロー`
-5. 5章 `Skills と再利用可能な手順設計`
-6. 6章 `MCP 連携で広げる能力`
-7. 7章 `Profiles、SOUL.md、Context Files の設計`
-8. 8章 `Memory、Memory Providers、文脈の持続`
-9. 9章 `Checkpoints と安全な変更`
-10. 10章 `Gateway、Cron、長時間運用`
-11. 11章 `セキュリティ、承認、運用事故への備え`
-12. 12章 `OpenCode / OpenClaw との比較と使い分け`
+1. `Hermes Agent をどう捉えるか`
+2. `インストール、ディレクトリ構造、最初の設定`
+3. `モデル、プロバイダ、権限設計`
+4. `CLI 中心の日常ワークフロー`
+5. `Skills と再利用可能な作業手順`
+6. `MCP 連携の設計と運用`
+7. `Profiles、SOUL.md、Context Files`
+8. `Memory と文脈の持続`
+9. `Checkpoints、変更管理、ロールバック`
+10. `Gateway、Cron、常駐運用`
+11. `セキュリティ、承認、事故対応`
+12. `OpenCode / OpenClaw と比較した採用判断`
 
 ### 付録
 
-1. 付録 A `ForgeFlow の全体構成`
-2. 付録 B `主要機能と責務の対応`
-3. 付録 C `代表的な設定断片と安全運用断片`
+1. `ForgeFlow の全体構成`
+2. `主要機能と責務の対応`
+3. `設定断片と安全運用断片`
+4. `設定キー完全表 1`
+5. `設定キー完全表 2`
+6. `プラットフォーム・安全性・運用キー完全表`
+7. `互換キー・動的キー完全表`
+8. `認証系環境変数とプロセス上書き一覧`
 
 ### 後付
 
@@ -78,60 +84,65 @@
 - 付録 A: [appendix-forgeflow-structure.md](/Users/goura32/techbook/books/hermes-agent-practical/appendix-forgeflow-structure.md)
 - 付録 B: [appendix-capability-map.md](/Users/goura32/techbook/books/hermes-agent-practical/appendix-capability-map.md)
 - 付録 C: [appendix-config-and-safety-fragments.md](/Users/goura32/techbook/books/hermes-agent-practical/appendix-config-and-safety-fragments.md)
+- 付録 D: [appendix-configuration-reference.md](/Users/goura32/techbook/books/hermes-agent-practical/appendix-configuration-reference.md)
+- 付録 E: [appendix-environment-variable-catalog.md](/Users/goura32/techbook/books/hermes-agent-practical/appendix-environment-variable-catalog.md)
+- 付録 F: [appendix-platform-and-ops-reference.md](/Users/goura32/techbook/books/hermes-agent-practical/appendix-platform-and-ops-reference.md)
+- 付録 G: [appendix-compatibility-and-dynamic-reference.md](/Users/goura32/techbook/books/hermes-agent-practical/appendix-compatibility-and-dynamic-reference.md)
+- 付録 H: [appendix-process-overrides.md](/Users/goura32/techbook/books/hermes-agent-practical/appendix-process-overrides.md)
 
 ### 制作支援
 
 - 図表計画: [figures.md](/Users/goura32/techbook/books/hermes-agent-practical/figures.md)
-- 図表ラフ: [figures-roughs.md](/Users/goura32/techbook/books/hermes-agent-practical/figures-roughs.md)
 - 図表清書下書き: [figures-final.md](/Users/goura32/techbook/books/hermes-agent-practical/figures-final.md)
 - コード掲載方針: [code-samples.md](/Users/goura32/techbook/books/hermes-agent-practical/code-samples.md)
 - レイアウト確認: [layout-review.md](/Users/goura32/techbook/books/hermes-agent-practical/layout-review.md)
 - 参考情報方針: [reference-policy.md](/Users/goura32/techbook/books/hermes-agent-practical/reference-policy.md)
 
+## 本文と付録の役割分担
+
+- 本文:
+  - 判断軸
+  - 代表的な設定例
+  - 失敗例と切り分け
+  - どこまで任せ、どこで止めるか
+- 付録:
+  - 通しサンプル全体図
+  - 機能ごとの責務整理
+  - 最小構成の断片
+  - 設定項目ごとの既定値、関連 env、関連 CLI を引ける完全表
+  - 互換キー、動的キー、認証系 env、プロセス単位上書きの補助資料
+
 ## 章間のつなぎ
 
-- はじめに:
+- 前付:
   - 本書の目的
   - 想定読者
   - `ForgeFlow` を使う理由
-  - 読み方の案内
+  - 付録の使い分け
 - 本文 1章から4章:
-  - 導入と CLI の土台編
-- 本文 5章から10章:
-  - Skills、MCP、Profiles、Memory、Cron の運用編
-- 本文 11章から12章:
-  - 安全運用と比較編
-- おわりに:
-  - 本書全体の視点を短く回収する
+  - 導入と運用土台編
+- 本文 5章から9章:
+  - 能力追加と状態管理編
+- 本文 10章から11章:
+  - 常駐運用と安全設計編
+- 本文 12章:
+  - 採用判断編
+- 後付:
+  - 参考情報と著者情報
 
 ## 固定済みの前提
 
-- 扉、前付、後付の構成は固定済み
-- 目次は章見出し単位を基本にする
+- 目次は章見出し単位を基本とする
 - 参考情報は公式情報優先で転記する
 - 発行日は 2026年5月13日を仮設定として保持する
+- Hermes Agent の最新情報は 2026年5月14日時点の公式 docs / release を基準にする
 
 ## 組版前チェック
 
 - 章タイトル表記が目次と本文で一致しているか
-- 付録 A / B / C の参照表記が本文と一致しているか
+- 付録 A / B / C / D / E / F / G / H の参照表記が本文と一致しているか
 - 図表番号と図表キャプションが本文順に並ぶか
+- 本文へ入れる設定例が付録と矛盾していないか
 - 前付と後付を入れたあとでページバランスが崩れないか
 
 詳細な作業チェックは [final-assembly-checklist.md](/Users/goura32/techbook/books/hermes-agent-practical/final-assembly-checklist.md) を使う。
-
-## 目次粒度の採用方針
-
-- 基本は 1 段階目の見出しのみ
-- 章数が多いため、まずは一覧性を優先する
-- 節見出しを追加する場合は、長い章だけへ限定する
-- 付録と後付の主要見出しは目次へ含める
-
-## 参考情報の最終転記方針
-
-- 公式情報を優先する
-- 本文で直接使った判断材料を優先する
-- 日付依存の強い項目だけ公開日を併記する
-- URL は組版直前に一括で点検して転記する
-
-転記候補の管理は [reference-sources.md](/Users/goura32/techbook/books/hermes-agent-practical/reference-sources.md) を使う。
