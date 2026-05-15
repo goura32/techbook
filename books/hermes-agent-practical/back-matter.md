@@ -14,33 +14,49 @@ Hermes Agent の価値は、何でもできそうに見えることではあり�
 
 ### Hermes Agent 公式情報
 
-- Hermes Agent GitHub Repository  
-  種別: 公式リポジトリ  
+- Hermes Agent GitHub Repository
+  種別: 公式リポジトリ
   URL: `https://github.com/NousResearch/hermes-agent`
-- Hermes Agent Documentation  
-  種別: 公式ドキュメント  
+- Hermes Agent Documentation
+  種別: 公式ドキュメント
   URL: `https://hermes-agent.nousresearch.com/docs/`
-- Hermes Agent v0.13.0 Release Notes  
-  種別: 公式リリースノート  
-  日付: 2026年5月7日  
+- Hermes Agent Source Code (main branch)
+  種別: 公式ソースコード
+  注記: 設定キー、既定値、env / CLI bridge の確認に使用
+  URL: `https://github.com/NousResearch/hermes-agent`
+- Hermes Agent v0.13.0 Release Notes
+  種別: 公式リリースノート
+  日付: 2026年5月7日
   URL: `https://github.com/NousResearch/hermes-agent/releases/tag/v2026.5.7`
 
 ### 主要機能の公式情報
 
-- Profiles: Running Multiple Agents  
-  種別: 公式ドキュメント  
+- Configuration
+  種別: 公式ドキュメント
+  URL: `https://hermes-agent.nousresearch.com/docs/user-guide/configuration`
+- CLI Commands
+  種別: 公式ドキュメント
+  URL: `https://hermes-agent.nousresearch.com/docs/reference/cli-commands`
+- Environment Variables
+  種別: 公式ドキュメント
+  URL: `https://hermes-agent.nousresearch.com/docs/reference/environment-variables`
+- Profiles: Running Multiple Agents
+  種別: 公式ドキュメント
   URL: `https://hermes-agent.nousresearch.com/docs/user-guide/profiles/`
-- MCP (Model Context Protocol)  
-  種別: 公式ドキュメント  
+- MCP (Model Context Protocol)
+  種別: 公式ドキュメント
   URL: `https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp/`
-- Checkpoints and /rollback  
-  種別: 公式ドキュメント  
+- MCP Config Reference
+  種別: 公式ドキュメント
+  URL: `https://hermes-agent.nousresearch.com/docs/reference/mcp-config-reference`
+- Checkpoints and /rollback
+  種別: 公式ドキュメント
   URL: `https://hermes-agent.nousresearch.com/docs/user-guide/checkpoints-and-rollback`
-- Scheduled Tasks (Cron)  
-  種別: 公式ドキュメント  
+- Scheduled Tasks (Cron)
+  種別: 公式ドキュメント
   URL: `https://hermes-agent.nousresearch.com/docs/user-guide/features/cron/`
-- Memory Providers  
-  種別: 公式ドキュメント  
+- Memory Providers
+  種別: 公式ドキュメント
   URL: `https://hermes-agent.nousresearch.com/docs/user-guide/features/memory-providers/`
 
 ## 著者紹介
@@ -52,7 +68,7 @@ Hermes Agent の価値は、何でもできそうに見えることではあり�
 ## 奥付
 
 - 書名: `技術の輪郭 Hermes Agent`
-- サブタイトル: `Skills、MCP、Memory、Profiles、運用設計までを実務でつなぐ`
+- サブタイトル: `設定、Skills、MCP、Memory、Profiles、長時間運用までを実務でつなぐ`
 - シリーズ名: `技術の輪郭`
 - 著者名: `大島 のりあ`
 - 発行日: 2026年5月13日（仮）

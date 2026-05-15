@@ -6,6 +6,7 @@
 - Hermes Agent を試したが、継続運用の設計に不安がある人
 - Skills や MCP を使って自分用ワークフローを育てたい人
 - CLI 中心の利用から、チームや長時間運用へ広げたい人
+- `config.yaml` `.env` CLI 引数の関係を整理し、設定事故を減らしたい人
 
 ## 前提知識
 
@@ -16,6 +17,7 @@
 ## 読了後の到達目標
 
 - Hermes Agent の導入、設定、運用方針を自分で決められる
+- `config.yaml` `.env` CLI 引数のどこへ何を置くべきか判断できる
 - Skills、MCP、Memory、Cron を実務に合わせて使い分けられる
 - セキュリティと利便性のバランスを取りながら継続運用できる
 - OpenCode や OpenClaw と比べたうえで、Hermes Agent を採用すべき条件を言語化できる
